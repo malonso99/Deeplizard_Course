@@ -218,16 +218,62 @@ def plot_confusion_matrix(cm, classes,
 cm_plot_labels = ['no_side_effects','had_side_effects']
 plot_confusion_matrix(cm=cm, classes=cm_plot_labels, title='Confusion Matrix')
 
+########################
+# Options to Save Models
+########################
+## Checks first to see if file exists already. 
+## If not, the model is saved to the disk
+"""
+This save functions saves:
+    + The architecture of the model, allowing to re-create the model
+    + The weights of the model
+    + The training configuration (loss, optimizer)
+    + The state of the optimizer, allowing to resume training exctly where you left off
+"""
+
+import os.path
+if os.path.isfile('models/medical_trial_model.h5') is False:
+    model.save('models/medical_trial_model.h5')
+    
+"""
+If only the architecture of a model is needed, we can use JSON format
+"""
+json_string = model.to_json()
+json_string
+
+"""If only we want to save the weights of a model:"""
+import os.path
+if os.path.isfile('models/my_model_weights.h5') is False:
+    model.save_weights('models/my_model_weights.h5')
 
 
 
+##########
+# Load Model
+##########
 
+from tensorflow.keras.models import load_model
+new_model = load_model('models/medical_trial_model.h5')
 
+new_model.summary()  # Comparing summaries we will observe it is an exact replica to model created
+new_model.get_weights()
+new_model.optimizer
 
+## Model reconstruction from JSON
+from tensorflow.keras.models import model_from_json
+model_architecture = model_from_json(json_string)
 
+model_architecture.summary()
 
+## Reconstruction from weights: we will need first to create a model with identical architecture as
+## the initial model and then we can import the weights
+model2 = Sequential([
+    Dense(units=16, input_shape=(1,), activation='relu'),
+    Dense(units=32, activation='relu'),
+    Dense(units=2, activation='softmax')
+])
 
-
+model2.load_weights('models/my_model_weights.h5')
 
 
 
